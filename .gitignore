@@ -2,3 +2,5 @@ aclImdb*
 doc2vec
 .ipynb_checkpoints/
 alldata.txt
+all_train.txt
+
