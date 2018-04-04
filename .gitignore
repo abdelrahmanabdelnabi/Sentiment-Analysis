@@ -3,4 +3,6 @@ doc2vec
 .ipynb_checkpoints/
 alldata.txt
 all_train.txt
+all_test.txt
+glove.6B
 
