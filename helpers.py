@@ -7,6 +7,8 @@ from sklearn.model_selection import cross_val_score
 from itertools import product
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
 
 
 
