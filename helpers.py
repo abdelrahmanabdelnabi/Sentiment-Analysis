@@ -3,6 +3,12 @@ import os
 from nltk.collocations import BigramCollocationFinder
 from nltk.metrics import BigramAssocMeasures
 import numpy as np
+from sklearn.model_selection import cross_val_score
+from itertools import product
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+
+
 
 def get_wordnet_pos(treebank_tag):
     if treebank_tag.startswith('J'):
@@ -101,3 +107,34 @@ def load_glove_dict(size):
         vec = [float(num) for num in tokens[1::]]
         glove_dict[word] = vec
     return glove_dict
+
+
+def combination_of_params(dictionary):
+    return [dict(zip(dictionary, v)) for v in product(*dictionary.values())]
+
+
+def get_clfs_for_combinations(classifier, param_vals_dict):
+    clfs = []
+    for comb in combination_of_params(param_vals_dict):
+        clfs.append(classifier(**comb))
+    return clfs
+
+
+def cross_validate(data, labels, clfs, n_splits = 10):
+    assert data.shape[0] == len(labels)
+    
+    # shuffle the dRandomForestClassifierata and the labels
+    idx = np.random.permutation(data.shape[0])
+    
+    data = data[idx]
+    labels = labels[idx]
+    
+    # get kfolds
+    # for each classifier, test it on each of the k folds
+    clf_score_dict = {}
+    for clf in clfs:
+        scores = cross_val_score(clf, data, y=labels, cv=n_splits)
+        avg_score = sum(scores)/n_splits
+        clf_score_dict[clf] = avg_score
+        
+    return clf_score_dict
