@@ -85,18 +85,19 @@ def read_data(data_set_path):
 
     return data
 
-def get_doc_vecs_for_data(data, word_embeddings, dimensions, word_weights = None):
+def get_doc_vecs_for_data(data, word_embeddings, dimensions, word_weights = None, ignored_words=None):
     doc_vecs = np.empty([len(data), dimensions])
 
     for idx,review in enumerate(data):
         doc_vec = np.zeros([1,dimensions])
         for word in review:
-            if word_weights != None:
-                if word in word_embeddings and word in word_weights:
-                    doc_vec += word_weights[word]*word_embeddings[word]
-            else:
-                if word in word_embeddings:
-                    doc_vec += word_embeddings[word]
+            if ignored_words == None or word not in ignored_words:
+                if word_weights != None:
+                    if word in word_embeddings and word in word_weights:
+                        doc_vec += word_weights[word]*word_embeddings[word]
+                else:
+                    if word in word_embeddings:
+                        doc_vec += word_embeddings[word]
         doc_vecs[idx] = doc_vec/len(review)
     
     return doc_vecs
