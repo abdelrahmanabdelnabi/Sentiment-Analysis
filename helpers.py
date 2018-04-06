@@ -9,6 +9,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
+from bs4 import BeautifulSoup as bs # library for removing html tags from text
+import nltk # natural language tool kit: for text pre-processing
+from nltk.corpus import stopwords # a set of common stopwords from nltk
 
 
 
@@ -50,6 +53,9 @@ def read_data(data_set_path):
             data.append(vec)
         return data
         
+    stop_words = set(stopwords.words('english'))
+    stop_words.update(['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}', '``', "''", '...','the','for',"'s","'m"])
+    wnl = nltk.WordNetLemmatizer()
     
     for file_name in os.listdir(data_set_path):
         file_path = os.path.join(data_set_path, file_name)
