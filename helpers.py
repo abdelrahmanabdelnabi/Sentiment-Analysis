@@ -10,7 +10,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 
-
+import gensim
+from bs4 import BeautifulSoup as bs
+import nltk # natural language tool kit: for text pre-processing
+import os # for listing directories
+import numpy as np # no comment :P
+from nltk.corpus import stopwords # a set of common stopwords from nltk
+from gensim import models
+from collections import namedtuple
 
 def get_wordnet_pos(treebank_tag):
     if treebank_tag.startswith('J'):
@@ -37,6 +44,10 @@ def get_bigrams(train_data):
             tokens.append(x)
     print(tokens)
 
+
+stop_words = set(stopwords.words('english'))
+stop_words.update(['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}', '``', "''", '...','the','for',"'s","'m"])
+wnl = nltk.WordNetLemmatizer()
 def read_data(data_set_path):
     data = []
     
