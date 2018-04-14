@@ -9,6 +9,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
+from bs4 import BeautifulSoup as bs # library for removing html tags from text
+import nltk # natural language tool kit: for text pre-processing
+from nltk.corpus import stopwords # a set of common stopwords from nltk
 
 import gensim
 from bs4 import BeautifulSoup as bs
@@ -61,6 +64,9 @@ def read_data(data_set_path):
             data.append(vec)
         return data
         
+    stop_words = set(stopwords.words('english'))
+    stop_words.update(['.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}', '``', "''", '...','the','for',"'s","'m"])
+    wnl = nltk.WordNetLemmatizer()
     
     for file_name in os.listdir(data_set_path):
         file_path = os.path.join(data_set_path, file_name)
@@ -90,18 +96,19 @@ def read_data(data_set_path):
 
     return data
 
-def get_doc_vecs_for_data(data, word_embeddings, dimensions, word_weights = None):
+def get_doc_vecs_for_data(data, word_embeddings, dimensions, word_weights = None, ignored_words=None):
     doc_vecs = np.empty([len(data), dimensions])
 
     for idx,review in enumerate(data):
         doc_vec = np.zeros([1,dimensions])
         for word in review:
-            if word_weights != None:
-                if word in word_embeddings and word in word_weights:
-                    doc_vec += word_weights[word]*word_embeddings[word]
-            else:
-                if word in word_embeddings:
-                    doc_vec += word_embeddings[word]
+            if ignored_words == None or word not in ignored_words:
+                if word_weights != None:
+                    if word in word_embeddings and word in word_weights:
+                        doc_vec += word_weights[word]*word_embeddings[word]
+                else:
+                    if word in word_embeddings:
+                        doc_vec += word_embeddings[word]
         doc_vecs[idx] = doc_vec/len(review)
     
     return doc_vecs
