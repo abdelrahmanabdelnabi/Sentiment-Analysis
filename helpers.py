@@ -12,7 +12,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from bs4 import BeautifulSoup as bs # library for removing html tags from text
 import nltk # natural language tool kit: for text pre-processing
 from nltk.corpus import stopwords # a set of common stopwords from nltk
-
+import matplotlib.pyplot as plt
 
 
 def get_wordnet_pos(treebank_tag):
@@ -51,6 +51,7 @@ def read_data(data_set_path):
             vec = line.split(" ")
             vec = [item for item in vec if item != '\n']
             data.append(vec)
+        all_data_file.close()
         return data
         
     stop_words = set(stopwords.words('english'))
@@ -63,6 +64,8 @@ def read_data(data_set_path):
 
         # read raw text
         text = file.read()
+
+        file.close()
 
         # remove html tags
         text = bs(text, "html.parser").get_text()
@@ -115,6 +118,8 @@ def load_glove_dict(size):
         word = tokens[0]
         vec = [float(num) for num in tokens[1::]]
         glove_dict[word] = vec
+
+    glove_file.close()
     return glove_dict
 
 
@@ -132,9 +137,8 @@ def get_clfs_for_combinations(classifier, param_vals_dict):
 def cross_validate(data, labels, clfs, n_splits = 10):
     assert data.shape[0] == len(labels)
     
-    # shuffle the dRandomForestClassifierata and the labels
+    # shuffle the data and the labels
     idx = np.random.permutation(data.shape[0])
-    
     data = data[idx]
     labels = labels[idx]
     
@@ -143,7 +147,50 @@ def cross_validate(data, labels, clfs, n_splits = 10):
     clf_score_dict = {}
     for clf in clfs:
         scores = cross_val_score(clf, data, y=labels, cv=n_splits)
-        avg_score = sum(scores)/n_splits
-        clf_score_dict[clf] = avg_score
+        clf_score_dict[clf] = scores
         
     return clf_score_dict
+
+def print_clf_scores(scores_dict, clf_params):
+    for clf in scores_dict.keys():
+        params = []
+        for param in clf_params:
+            params.append( (param, clf.get_params()[param]) )
+        scores = scores_dict[clf]
+        avg_score = sum(scores)/len(scores)
+        print("clf with params: {}, score: {}".format(params, avg_score))
+
+def plot_accuracies(accuracies_dict, xlabel=None, ylabel='Accuracy', title=None):
+    """
+    returns an error bar plot for the given parameters and accuracies
+    """
+
+    xs = None
+    means = []
+    errors = []
+    params = list(accuracies_dict.keys())
+    params = np.sort(params)
+    
+    if type(params[0]) is float:
+        xs = params
+    else:
+        xs = list(range(1, len(params) + 1))
+
+    for param in params:
+        means.append(np.mean(accuracies_dict[param]))
+        errors.append(np.std(accuracies_dict[param]))
+    
+    plt.subplot(111)
+    plt.errorbar(xs, means, errors, linestyle='None', marker='o')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    if type(params[0]) is not float:
+        plt.xticks(xs, [str(param) for param in params])
+
+    return plt.gcf()
+
+
+def clf_to_accuracies_dict(clf_scores_dict, param):
+    return dict([(clf.get_params()[param], clf_scores_dict[clf]) for clf in clf_scores_dict.keys()])

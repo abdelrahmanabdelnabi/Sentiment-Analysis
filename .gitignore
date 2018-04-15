@@ -6,3 +6,4 @@ all_train.txt
 all_test.txt
 glove.6B
 __pycache__
+plots/
