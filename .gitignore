@@ -7,5 +7,4 @@ all_test.txt
 glove.6B
 __pycache__
 gensim*
-plots/
-
+NLP_report.pdf
